@@ -1,0 +1,12 @@
+{
+  "name": "niyokkam-printout-generator",
+  "version": "1.0.0",
+  "description": "Generate Malayalam Karthika-font Word documents from Unicode text (browser-based, no build step).",
+  "type": "module",
+  "scripts": {
+    "test": "node --test src/converter/unicode2ascii.test.js",
+    "serve": "npx --yes serve ."
+  },
+  "keywords": ["malayalam", "karthika", "docx", "niyokkam"],
+  "license": "MIT"
+}
