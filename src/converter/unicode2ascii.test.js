@@ -21,6 +21,7 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import { unicode2ascii } from "./unicode2ascii.js";
+import { getMalayalamExportText, getMalayalamFontStack } from "../font/fontSupport.js";
 
 describe("unicode2ascii — passthrough", () => {
   it("returns empty string for empty input", () => {
@@ -161,5 +162,18 @@ describe("unicode2ascii — mixed input", () => {
 
   it("handles word with space between two consonants", () => {
     assert.equal(unicode2ascii("ക ത"), "I X");
+  });
+});
+
+describe("font fallback behavior", () => {
+  it("uses Unicode text when legacy font is unavailable", () => {
+    const text = "അയ്യോ";
+    const fallbackText = getMalayalamExportText(text, false);
+    assert.equal(fallbackText, text);
+  });
+
+  it("uses a Unicode-safe fallback font stack when legacy font is missing", () => {
+    const stack = getMalayalamFontStack(false);
+    assert.ok(stack.includes("Noto Sans Malayalam") || stack.includes("Nirmala UI"));
   });
 });

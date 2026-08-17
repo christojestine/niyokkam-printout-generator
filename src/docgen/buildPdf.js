@@ -30,6 +30,11 @@
  */
 
 import { unicode2ascii } from "../converter/unicode2ascii.js";
+import {
+  getMalayalamExportText,
+  getMalayalamFontStack,
+  hasLegacyMalayalamFont,
+} from "../font/fontSupport.js";
 
 // CSS px at 96dpi for A4 landscape (11.69in x 8.27in) — kept in the same
 // aspect ratio as the PDF page so the rasterized image fills it exactly.
@@ -71,6 +76,8 @@ function createHiddenRenderFrame() {
  * @returns {HTMLDivElement}
  */
 function createPageElement(iframeDoc, item) {
+  const legacyFontEnabled = hasLegacyMalayalamFont();
+  const contentFontStack = getMalayalamFontStack(legacyFontEnabled);
   const page = iframeDoc.createElement("div");
   page.style.cssText = `
     width: ${PAGE_WIDTH_PX}px;
@@ -106,9 +113,9 @@ function createPageElement(iframeDoc, item) {
   `;
 
   const contentEl = iframeDoc.createElement("div");
-  contentEl.textContent = unicode2ascii(item.content);
+  contentEl.textContent = legacyFontEnabled ? unicode2ascii(item.content) : getMalayalamExportText(item.content, false);
   contentEl.style.cssText = `
-    font-family: "ML-TTPooram", sans-serif;
+    font-family: ${contentFontStack};
     font-weight: bold;
     font-size: 36pt;
     color: #000000;

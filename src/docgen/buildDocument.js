@@ -16,6 +16,11 @@
  */
 
 import { unicode2ascii } from "../converter/unicode2ascii.js";
+import {
+  getMalayalamExportText,
+  getMalayalamFontStack,
+  hasLegacyMalayalamFont,
+} from "../font/fontSupport.js";
 
 // A4 dimensions in twentieths-of-a-point (twips). 1 inch = 1440 twips.
 // A4 portrait: width=11906, height=16838
@@ -53,6 +58,9 @@ export async function buildDocument(items, options = {}) {
     contentFontSize = 72,  // half-points → 36pt
   } = options;
 
+  const legacyFontEnabled = hasLegacyMalayalamFont();
+  const contentFontName = legacyFontEnabled ? "ML-TTPooram" : "Noto Sans Malayalam";
+  const contentFontStack = getMalayalamFontStack(legacyFontEnabled);
   const children = [];
 
   items.forEach((item, idx) => {
@@ -85,11 +93,17 @@ export async function buildDocument(items, options = {}) {
             // hint:"default" forces Word to render with the ascii/hAnsi font immediately,
             // instead of leaving stale glyph metrics that only refresh once the font is
             // manually reselected in the Font box.
-            text: unicode2ascii(item.content),
+            text: legacyFontEnabled ? unicode2ascii(item.content) : getMalayalamExportText(item.content, false),
             bold: true,
             noProof: true,
             size: contentFontSize,
-            font: { ascii: "ML-TTPooram", hAnsi: "ML-TTPooram", cs: "ML-TTPooram", eastAsia: "ML-TTPooram", hint: "default" },
+            font: {
+              ascii: contentFontName,
+              hAnsi: contentFontName,
+              cs: contentFontName,
+              eastAsia: contentFontName,
+              hint: "default",
+            },
           }),
         ],
         spacing: { after: 240 },
@@ -113,7 +127,13 @@ export async function buildDocument(items, options = {}) {
       default: {
         document: {
           run: {
-            font: { ascii: "ML-TTPooram", hAnsi: "ML-TTPooram", cs: "ML-TTPooram", eastAsia: "ML-TTPooram", hint: "default" },
+            font: {
+              ascii: contentFontName,
+              hAnsi: contentFontName,
+              cs: contentFontName,
+              eastAsia: contentFontName,
+              hint: "default",
+            },
           },
         },
       },

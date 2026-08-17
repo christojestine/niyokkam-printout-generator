@@ -5,6 +5,7 @@
 
 /* ── Google Font import ─────────────────────────────────────────────────── */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;700&display=swap");
 
 /* ── Design tokens ──────────────────────────────────────────────────────── */
 :root {
@@ -48,6 +49,7 @@
 
   /* Typography */
   --font-body:  "Inter", system-ui, -apple-system, sans-serif;
+  --font-malayalam: "Noto Sans Malayalam", "Nirmala UI", "FreeSerif", serif;
   --font-size-sm:   0.8125rem;
   --font-size-base: 0.9375rem;
   --font-size-lg:   1.0625rem;
