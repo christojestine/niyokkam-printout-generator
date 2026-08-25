@@ -13,7 +13,6 @@ export const LEGACY_MALAYALAM_FONT_NAMES = [
   "Karthika",
   "Kartika",
   "Rachana",
-  "Noto Sans Malayalam",
 ];
 
 export const FALLBACK_MALAYALAM_FONT_STACK = [

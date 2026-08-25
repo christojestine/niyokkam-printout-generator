@@ -22,11 +22,14 @@
  *
  * Page layout  : Landscape A4, one date-content item per page
  * Date heading : TW Cen MT, Bold, 36pt, Centered
- * Content      : Malayalam text converted to legacy ML-TT ASCII glyph codes
- *                (see converter/unicode2ascii.js + converter/mapTable.js),
- *                rendered with the "ML-TT Pooram" font, Bold, 36pt, Centered.
- *                Requires the ML-TT Pooram font to be installed in the browser
- *                environment generating the PDF.
+ * Content      : Falls back to the legacy ML-TT ASCII glyph codes (see
+ *                converter/unicode2ascii.js + converter/mapTable.js) only if
+ *                the legacy Karthika/ML-TT Pooram font is detected on the
+ *                device; otherwise renders plain Malayalam Unicode text with
+ *                the self-hosted Noto Sans Malayalam font (bundled in
+ *                src/font/files/, loaded into the capture iframe below) so
+ *                output is correct on any device without relying on an
+ *                OS-installed font.
  */
 
 import { unicode2ascii } from "../converter/unicode2ascii.js";
@@ -42,12 +45,20 @@ const PAGE_WIDTH_PX  = 1123;
 const PAGE_HEIGHT_PX = 794;
 const MARGIN_PX       = 48; // 0.5in narrow margin, matches buildDocument.js
 
+// Absolute URLs so the font resolves correctly regardless of the iframe's
+// own document base (it has none — it's built with document.write()).
+const MALAYALAM_FONT_REGULAR_URL = new URL("../font/files/NotoSansMalayalam-Regular.woff2", import.meta.url).href;
+const MALAYALAM_FONT_BOLD_URL = new URL("../font/files/NotoSansMalayalam-Bold.woff2", import.meta.url).href;
+
 /**
  * Creates a hidden, same-origin iframe with a zero footprint on the host
  * page and returns its document, ready for building capture pages in.
- * @returns {{ iframe: HTMLIFrameElement, iframeDoc: Document }}
+ * Also loads the self-hosted Malayalam font into the iframe's own font
+ * context, since it starts as a blank document with none of the host
+ * page's stylesheets/@font-face rules.
+ * @returns {Promise<{ iframe: HTMLIFrameElement, iframeDoc: Document }>}
  */
-function createHiddenRenderFrame() {
+async function createHiddenRenderFrame() {
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
   iframe.style.cssText = `
@@ -66,6 +77,32 @@ function createHiddenRenderFrame() {
   iframeDoc.write("<!DOCTYPE html><html><head></head><body></body></html>");
   iframeDoc.close();
   iframeDoc.body.style.margin = "0";
+
+  const styleEl = iframeDoc.createElement("style");
+  styleEl.textContent = `
+    @font-face {
+      font-family: "Noto Sans Malayalam";
+      font-style: normal;
+      font-weight: 400;
+      src: url("${MALAYALAM_FONT_REGULAR_URL}") format("woff2");
+    }
+    @font-face {
+      font-family: "Noto Sans Malayalam";
+      font-style: normal;
+      font-weight: 700;
+      src: url("${MALAYALAM_FONT_BOLD_URL}") format("woff2");
+    }
+  `;
+  iframeDoc.head.appendChild(styleEl);
+
+  // Force both weights to actually fetch/decode before any page is captured —
+  // @font-face alone is lazy and won't load until first matched, which would
+  // be too late for html2canvas's synchronous-ish rasterization.
+  await Promise.all([
+    iframeDoc.fonts.load('700 36pt "Noto Sans Malayalam"'),
+    iframeDoc.fonts.load('400 36pt "Noto Sans Malayalam"'),
+  ]);
+  await iframeDoc.fonts.ready;
 
   return { iframe, iframeDoc };
 }
@@ -142,7 +179,7 @@ export async function buildPdf(items) {
   const pageWidthPt = doc.internal.pageSize.getWidth();
   const pageHeightPt = doc.internal.pageSize.getHeight();
 
-  const { iframe, iframeDoc } = createHiddenRenderFrame();
+  const { iframe, iframeDoc } = await createHiddenRenderFrame();
 
   try {
     for (let idx = 0; idx < items.length; idx++) {

@@ -22,10 +22,16 @@
     <link rel="stylesheet" href="./style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
+
+    <!--
+      Malayalam font is self-hosted (src/font/files/*.woff2, declared in
+      style.css) rather than loaded from Google Fonts or relied upon as an
+      OS-installed font — this keeps rendering consistent on any device,
+      region, or network condition, including mobile browsers/OSes that
+      don't ship a Malayalam system font.
+    -->
+    <link rel="preload" as="font" type="font/woff2" href="./src/font/files/NotoSansMalayalam-Regular.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="./src/font/files/NotoSansMalayalam-Bold.woff2" crossorigin />
 
     <!--
       Import map — pinned exact CDN versions so the deployed site never

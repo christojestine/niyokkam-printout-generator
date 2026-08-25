@@ -3,9 +3,27 @@
    Design: dark-mode glass-morphism, violet-blue accent palette
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Google Font import ─────────────────────────────────────────────────── */
+/* ── Google Font import (UI font only) ─────────────────────────────────── */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;700&display=swap");
+
+/* ── Self-hosted Malayalam font ────────────────────────────────────────────
+   Bundled locally (not a Google Fonts CDN or OS-installed font) so Malayalam
+   text renders identically on every device/region/network, including mobile
+   browsers that don't ship a Malayalam system font. ────────────────────── */
+@font-face {
+  font-family: "Noto Sans Malayalam";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./src/font/files/NotoSansMalayalam-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans Malayalam";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./src/font/files/NotoSansMalayalam-Bold.woff2") format("woff2");
+}
 
 /* ── Design tokens ──────────────────────────────────────────────────────── */
 :root {
@@ -271,13 +289,15 @@ body {
   margin-top: 2px;
 }
 
-/* Malayalam inputs use a larger font size for readability */
+/* Malayalam inputs use the bundled Malayalam font + a larger size for readability */
 .malayalam-input {
+  font-family: var(--font-malayalam);
   font-size: 1.05rem;
   line-height: 1.7;
 }
 
 .malayalam-display {
+  font-family: var(--font-malayalam);
   font-size: 0.95rem;
   color: var(--clr-text-muted);
   margin-top: 2px;
