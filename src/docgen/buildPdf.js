@@ -22,22 +22,13 @@
  *
  * Page layout  : Landscape A4, one date-content item per page
  * Date heading : TW Cen MT, Bold, 36pt, Centered
- * Content      : Falls back to the legacy ML-TT ASCII glyph codes (see
- *                converter/unicode2ascii.js + converter/mapTable.js) only if
- *                the legacy Karthika/ML-TT Pooram font is detected on the
- *                device; otherwise renders plain Malayalam Unicode text with
- *                the self-hosted Noto Sans Malayalam font (bundled in
- *                src/font/files/, loaded into the capture iframe below) so
- *                output is correct on any device without relying on an
- *                OS-installed font.
+ * Content      : Plain Malayalam Unicode text rendered with the self-hosted
+ *                Noto Sans Malayalam font (bundled in src/font/files/,
+ *                loaded into the capture iframe below) — no legacy ML-TT
+ *                glyph conversion or device-installed font dependency.
  */
 
-import { unicode2ascii } from "../converter/unicode2ascii.js";
-import {
-  getMalayalamExportText,
-  getMalayalamFontStack,
-  hasLegacyMalayalamFont,
-} from "../font/fontSupport.js";
+import { getMalayalamFontStack } from "../font/fontSupport.js";
 
 // CSS px at 96dpi for A4 landscape (11.69in x 8.27in) — kept in the same
 // aspect ratio as the PDF page so the rasterized image fills it exactly.
@@ -113,8 +104,7 @@ async function createHiddenRenderFrame() {
  * @returns {HTMLDivElement}
  */
 function createPageElement(iframeDoc, item) {
-  const legacyFontEnabled = hasLegacyMalayalamFont();
-  const contentFontStack = getMalayalamFontStack(legacyFontEnabled);
+  const contentFontStack = getMalayalamFontStack(false);
   const page = iframeDoc.createElement("div");
   page.style.cssText = `
     width: ${PAGE_WIDTH_PX}px;
@@ -150,7 +140,7 @@ function createPageElement(iframeDoc, item) {
   `;
 
   const contentEl = iframeDoc.createElement("div");
-  contentEl.textContent = legacyFontEnabled ? unicode2ascii(item.content) : getMalayalamExportText(item.content, false);
+  contentEl.textContent = item.content;
   contentEl.style.cssText = `
     font-family: ${contentFontStack};
     font-weight: bold;

@@ -5,22 +5,12 @@
  *
  * Page layout  : Landscape (A4), one date-content item per page
  * Date heading : TW Cen MT, Bold, 36pt, Centered
- * Content      : Malayalam text converted to legacy ML-TT ASCII glyph codes
- *                (see converter/unicode2ascii.js + converter/mapTable.js,
- *                extracted from the ratheesh.in Unicode→ML-TT converter) and
- *                rendered with the "ML-TT Pooram" font, Bold, 36pt, Centered.
- *                Requires the ML-TT Pooram font to be installed wherever the
- *                document is viewed/printed.
+ * Content      : Plain Malayalam Unicode text rendered with the self-hosted
+ *                Noto Sans Malayalam font (see src/font/files/) — no legacy
+ *                ML-TT/Karthika font or device-installed font dependency.
  *
  * Depends on the `docx` ES module (loaded via import map from esm.sh).
  */
-
-import { unicode2ascii } from "../converter/unicode2ascii.js";
-import {
-  getMalayalamExportText,
-  getMalayalamFontStack,
-  hasLegacyMalayalamFont,
-} from "../font/fontSupport.js";
 
 // A4 dimensions in twentieths-of-a-point (twips). 1 inch = 1440 twips.
 // A4 portrait: width=11906, height=16838
@@ -58,9 +48,12 @@ export async function buildDocument(items, options = {}) {
     contentFontSize = 72,  // half-points → 36pt
   } = options;
 
-  const legacyFontEnabled = hasLegacyMalayalamFont();
-  const contentFontName = legacyFontEnabled ? "ML-TTPooram" : "Noto Sans Malayalam";
-  const contentFontStack = getMalayalamFontStack(legacyFontEnabled);
+  // Always render plain Malayalam Unicode text with the bundled Noto Sans
+  // Malayalam font. Detecting a legacy ML-TT/Karthika font by name is
+  // unreliable — many devices ship an unrelated system font sharing that
+  // name, which previously caused perfectly valid Unicode text to be
+  // mangled into ASCII glyph codes it could never render correctly.
+  const contentFontName = "Noto Sans Malayalam";
   const children = [];
 
   items.forEach((item, idx) => {
@@ -84,7 +77,7 @@ export async function buildDocument(items, options = {}) {
     children.push(new Paragraph({ children: [] }));
     children.push(new Paragraph({ children: [] }));
 
-    // ── Content — converted to ML-TT ASCII glyphs, ML-TT Pooram font ────
+    // ── Content — plain Malayalam Unicode, Noto Sans Malayalam font ─────
     children.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -93,7 +86,7 @@ export async function buildDocument(items, options = {}) {
             // hint:"default" forces Word to render with the ascii/hAnsi font immediately,
             // instead of leaving stale glyph metrics that only refresh once the font is
             // manually reselected in the Font box.
-            text: legacyFontEnabled ? unicode2ascii(item.content) : getMalayalamExportText(item.content, false),
+            text: item.content,
             bold: true,
             noProof: true,
             size: contentFontSize,
