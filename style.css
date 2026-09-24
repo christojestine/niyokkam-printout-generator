@@ -25,6 +25,17 @@
   src: url("./src/font/files/NotoSansMalayalam-Bold.woff2") format("woff2");
 }
 
+/* ── Bundled print font (patched ML-TT Pooram, see tools/build-font.py) ──
+   Renders the ML-TT glyph codes used in exports, so the on-screen print
+   preview matches the .docx/.pdf output on every device. ────────────── */
+@font-face {
+  font-family: "NiyokkamPooram";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("./src/font/files/NiyokkamPooram.ttf") format("truetype");
+}
+
 /* ── Design tokens ──────────────────────────────────────────────────────── */
 :root {
   /* Colors */
@@ -68,6 +79,7 @@
   /* Typography */
   --font-body:  "Inter", system-ui, -apple-system, sans-serif;
   --font-malayalam: "Noto Sans Malayalam", "Nirmala UI", "FreeSerif", serif;
+  --font-print: "NiyokkamPooram";
   --font-size-sm:   0.8125rem;
   --font-size-base: 0.9375rem;
   --font-size-lg:   1.0625rem;
@@ -302,6 +314,17 @@ body {
   color: var(--clr-text-muted);
   margin-top: 2px;
   word-break: break-word;
+}
+
+/* Print preview: ML-TT glyph codes in the bundled print font, as exported */
+.print-preview {
+  font-family: var(--font-print);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.5;
+  margin-top: 4px;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 /* ── Buttons ────────────────────────────────────────────────────────────── */

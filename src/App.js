@@ -100,7 +100,7 @@ export function App() {
 
       <!-- ── Footer ────────────────────────────────────────────────────── -->
       <footer class="app-footer">
-        <p>Niyokkam Printout Generator · Converts Malayalam Unicode to Karthika font glyphs</p>
+        <p>Niyokkam Printout Generator · Converts Malayalam Unicode to ML-TT Pooram font glyphs</p>
       </footer>
 
     </div>

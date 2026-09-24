@@ -1,80 +1,52 @@
 /**
  * fontSupport.js
  *
- * Centralized font handling for Malayalam export. The app relies on the
- * legacy Karthika/ML-TT font mapping for the generated document, but some
- * devices don't have that font installed. This helper provides a safe fallback
- * so export still works without crashing or silently rendering broken glyphs.
- */
-
-export const LEGACY_MALAYALAM_FONT_NAMES = [
-  "ML-TTPooram",
-  "ML-TT Pooram",
-  "Karthika",
-  "Kartika",
-  "Rachana",
-];
-
-export const FALLBACK_MALAYALAM_FONT_STACK = [
-  "Noto Sans Malayalam",
-  "Nirmala UI",
-  "FreeSerif",
-  "sans-serif",
-];
-
-/**
- * Detect whether a font name is available in the current browser/OS font list.
- * Falls back to a conservative approximation for non-browser runtimes.
+ * Centralized handling of the Malayalam print font. Content is converted
+ * from Unicode to legacy ML-TT glyph codes (see converter/unicode2ascii.js)
+ * and rendered with a patched copy of ML-TT Pooram bundled with the app
+ * (src/font/files/NiyokkamPooram.ttf, built by tools/build-font.py).
  *
- * @param {string} fontName
- * @returns {boolean}
+ * The font is embedded into every export (.docx and .pdf), so output never
+ * depends on which fonts are installed on the device that generates, opens
+ * or prints the document.
  */
-export function isFontAvailable(fontName) {
-  if (typeof document === "undefined") return false;
 
-  if (document.fonts && typeof document.fonts.check === "function") {
-    const parsedName = fontName.includes(" ") ? `"${fontName}"` : fontName;
-    return document.fonts.check(`12px ${parsedName}`);
-  }
+import { unicode2ascii } from "../converter/unicode2ascii.js";
 
-  return false;
-}
+/** Family name inside NiyokkamPooram.ttf — must match exactly for Word/CSS. */
+export const PRINT_FONT_NAME = "NiyokkamPooram";
+
+export const PRINT_FONT_URL = new URL("./files/NiyokkamPooram.ttf", import.meta.url).href;
 
 /**
- * Determine whether the legacy Karthika/ML-TT font is usable.
- *
- * @returns {boolean}
- */
-export function hasLegacyMalayalamFont() {
-  return LEGACY_MALAYALAM_FONT_NAMES.some((fontName) => isFontAvailable(fontName));
-}
-
-/**
- * Returns the export text: when the legacy font is unavailable, keep the
- * original Unicode text instead of converting to the ASCII glyph set.
+ * Converts Malayalam Unicode text to the glyph codes of the print font.
  *
  * @param {string} text
- * @param {boolean} [legacyFontEnabled=true]
  * @returns {string}
  */
-export function getMalayalamExportText(text, legacyFontEnabled = true) {
-  if (!text || legacyFontEnabled || typeof text !== "string") {
-    return text;
-  }
-
-  return text;
+export function toPrintText(text) {
+  return unicode2ascii(text ?? "");
 }
 
-/**
- * Returns a CSS font stack suitable for a Malayalam export page.
- *
- * @param {boolean} [legacyFontEnabled=true]
- * @returns {string}
- */
-export function getMalayalamFontStack(legacyFontEnabled = true) {
-  if (legacyFontEnabled) {
-    return '"ML-TTPooram", "Karthika", "Noto Sans Malayalam", sans-serif';
-  }
+let fontBytesPromise = null;
 
-  return '"Noto Sans Malayalam", "Nirmala UI", "FreeSerif", sans-serif';
+/**
+ * Fetches the bundled print font once and caches the bytes for later exports.
+ *
+ * @returns {Promise<Uint8Array>}
+ */
+export function loadPrintFontBytes() {
+  if (!fontBytesPromise) {
+    fontBytesPromise = fetch(PRINT_FONT_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Could not load print font (${res.status})`);
+        return res.arrayBuffer();
+      })
+      .then((buf) => new Uint8Array(buf))
+      .catch((err) => {
+        fontBytesPromise = null; // allow a retry on the next export
+        throw err;
+      });
+  }
+  return fontBytesPromise;
 }

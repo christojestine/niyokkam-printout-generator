@@ -5,12 +5,15 @@
  *
  * Page layout  : Landscape (A4), one date-content item per page
  * Date heading : TW Cen MT, Bold, 36pt, Centered
- * Content      : Plain Malayalam Unicode text rendered with the self-hosted
- *                Noto Sans Malayalam font (see src/font/files/) — no legacy
- *                ML-TT/Karthika font or device-installed font dependency.
+ * Content      : Malayalam converted to ML-TT glyph codes, rendered with the
+ *                bundled "NiyokkamPooram" font (patched ML-TT Pooram), Bold,
+ *                36pt, Centered. The font file is embedded in the .docx, so
+ *                Word renders it correctly even where it isn't installed.
  *
  * Depends on the `docx` ES module (loaded via import map from esm.sh).
  */
+
+import { PRINT_FONT_NAME, loadPrintFontBytes, toPrintText } from "../font/fontSupport.js";
 
 // A4 dimensions in twentieths-of-a-point (twips). 1 inch = 1440 twips.
 // A4 portrait: width=11906, height=16838
@@ -48,12 +51,8 @@ export async function buildDocument(items, options = {}) {
     contentFontSize = 72,  // half-points → 36pt
   } = options;
 
-  // Always render plain Malayalam Unicode text with the bundled Noto Sans
-  // Malayalam font. Detecting a legacy ML-TT/Karthika font by name is
-  // unreliable — many devices ship an unrelated system font sharing that
-  // name, which previously caused perfectly valid Unicode text to be
-  // mangled into ASCII glyph codes it could never render correctly.
-  const contentFontName = "Noto Sans Malayalam";
+  const contentFontName = PRINT_FONT_NAME;
+  const fontBytes = await loadPrintFontBytes();
   const children = [];
 
   items.forEach((item, idx) => {
@@ -77,7 +76,7 @@ export async function buildDocument(items, options = {}) {
     children.push(new Paragraph({ children: [] }));
     children.push(new Paragraph({ children: [] }));
 
-    // ── Content — plain Malayalam Unicode, Noto Sans Malayalam font ─────
+    // ── Content — ML-TT glyph codes, embedded Niyokkam Pooram font ───────
     children.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -86,7 +85,7 @@ export async function buildDocument(items, options = {}) {
             // hint:"default" forces Word to render with the ascii/hAnsi font immediately,
             // instead of leaving stale glyph metrics that only refresh once the font is
             // manually reselected in the Font box.
-            text: item.content,
+            text: toPrintText(item.content),
             bold: true,
             noProof: true,
             size: contentFontSize,
@@ -114,6 +113,8 @@ export async function buildDocument(items, options = {}) {
   });
 
   return new Document({
+    // Embed the print font so the document doesn't depend on installed fonts.
+    fonts: [{ name: contentFontName, data: fontBytes }],
     // Also override the doc-default run font so the paragraph mark (¶) matches the
     // content font — otherwise Word can re-layout/re-substitute glyphs on first edit.
     styles: {

@@ -8,7 +8,7 @@
     <title>Niyokkam Printout Generator</title>
     <meta
       name="description"
-      content="Generate Malayalam Karthika-font printouts from Unicode text. Add niyokkam items with dates and content, then export a Word document (.docx) ready for printing."
+      content="Generate Malayalam ML-TT font printouts from Unicode text. Add niyokkam items with dates and content, then export a Word document (.docx) ready for printing."
     />
 
     <!-- Favicon (inline SVG as data URI) -->
@@ -32,6 +32,8 @@
     -->
     <link rel="preload" as="font" type="font/woff2" href="./src/font/files/NotoSansMalayalam-Regular.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="./src/font/files/NotoSansMalayalam-Bold.woff2" crossorigin />
+    <!-- Print font (patched ML-TT Pooram) — used for the preview and embedded in exports -->
+    <link rel="preload" as="font" type="font/ttf" href="./src/font/files/NiyokkamPooram.ttf" crossorigin />
 
     <!--
       Import map — pinned exact CDN versions so the deployed site never
@@ -45,9 +47,8 @@
         "imports": {
           "react":            "https://esm.sh/react@19.0.0",
           "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-          "docx":             "https://esm.sh/docx@9.0.0",
+          "docx":             "https://esm.sh/docx@9.7.2",
           "jspdf":            "https://esm.sh/jspdf@2.5.2",
-          "html2canvas":      "https://esm.sh/html2canvas@1.4.1",
           "htm":              "https://esm.sh/htm@3.1.1",
           "htm/react":        "https://esm.sh/htm@3.1.1/react"
         }

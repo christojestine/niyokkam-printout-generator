@@ -6,6 +6,7 @@
 
 import { html } from "htm/react";
 import { useState, useCallback } from "react";
+import { toPrintText } from "../font/fontSupport.js";
 
 /**
  * @param {{
@@ -81,6 +82,7 @@ export function ItemRow({ item, index, onUpdate, onRemove }) {
       <div class="item-row__content">
         <div class="item-row__date">${item.date}</div>
         <div class="item-row__text malayalam-display">${item.content}</div>
+        <div class="item-row__text print-preview" title="Print preview">${toPrintText(item.content)}</div>
       </div>
       <div class="item-row__actions">
         <button
