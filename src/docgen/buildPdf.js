@@ -23,9 +23,10 @@ const MARGIN_PT       = 36;   // 0.5in narrow margin, matches buildDocument.js
 const BORDER_INSET_PT = 12;   // page border distance from the page edge
 const BORDER_GAP_PT   = 3;    // gap between the two lines of the double border
 const FONT_SIZE_PT    = 36;
+const CONTENT_FONT_SIZE_PT = FONT_SIZE_PT * 1.2; // Malayalam content 20% larger than the date
 const DATE_LINE_PT    = FONT_SIZE_PT * 1.15;
 const DATE_GAP_PT     = 6 + 2 * 14; // spacing after date + two blank lines
-const CONTENT_LINE_PT = FONT_SIZE_PT * 1.3;
+const CONTENT_LINE_PT = CONTENT_FONT_SIZE_PT * 1.3;
 const FAUX_BOLD_STROKE_PT = 0.9;
 
 const FONT_VFS_NAME = "NiyokkamPooram.ttf";
@@ -79,7 +80,7 @@ export async function buildPdf(items) {
     if (idx > 0) doc.addPage("a4", "landscape");
     drawPageBorder(doc, pageWidth, pageHeight);
 
-    doc.setFontSize(FONT_SIZE_PT);
+    doc.setFontSize(CONTENT_FONT_SIZE_PT);
     doc.setFont(PRINT_FONT_NAME, "normal");
     const contentLines = String(toPrintText(item.content))
       .split("\n")
@@ -89,10 +90,12 @@ export async function buildPdf(items) {
     const blockHeight = DATE_LINE_PT + DATE_GAP_PT + contentLines.length * CONTENT_LINE_PT;
     let y = Math.max(MARGIN_PT, (pageHeight - blockHeight) / 2);
 
+    doc.setFontSize(FONT_SIZE_PT);
     doc.setFont("helvetica", "bold");
     doc.text(item.date, centerX, y, { align: "center", baseline: "top" });
     y += DATE_LINE_PT + DATE_GAP_PT;
 
+    doc.setFontSize(CONTENT_FONT_SIZE_PT);
     doc.setFont(PRINT_FONT_NAME, "normal");
     doc.setLineWidth(FAUX_BOLD_STROKE_PT);
     for (const line of contentLines) {

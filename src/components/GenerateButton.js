@@ -13,6 +13,7 @@ import { buildDocument } from "../docgen/buildDocument.js";
 import { downloadDocx } from "../docgen/downloadDocx.js";
 import { buildPdf } from "../docgen/buildPdf.js";
 import { downloadPdf } from "../docgen/downloadPdf.js";
+import { dateRangeFilename } from "../docgen/downloadBlob.js";
 
 /**
  * @param {{
@@ -33,7 +34,7 @@ export function GenerateButton({ items }) {
     try {
       if (format === "pdf") {
         const blob = await buildPdf(items);
-        downloadPdf(blob);
+        downloadPdf(blob, dateRangeFilename(items, "pdf"));
       } else {
         const doc = await buildDocument(items);
         await downloadDocx(doc);

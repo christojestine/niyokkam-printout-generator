@@ -34,3 +34,18 @@ export function defaultFilename(extension) {
   const dd = String(now.getDate()).padStart(2, "0");
   return `niyokkam-${yyyy}${mm}${dd}.${extension}`;
 }
+
+/**
+ * "<first item date> to <last item date>.<ext>", with characters that are
+ * illegal in filenames (e.g. "/" in 01/10/2026) replaced by "-".
+ * @param {Array<{date:string}>} items
+ * @param {string} extension - file extension without the dot, e.g. "pdf"
+ */
+export function dateRangeFilename(items, extension) {
+  if (items.length === 0) return defaultFilename(extension);
+  const clean = (s) => String(s).trim().replace(/[\\/:*?"<>|]+/g, "-");
+  const first = clean(items[0].date);
+  const last = clean(items[items.length - 1].date);
+  const name = items.length === 1 || first === last ? first : `${first} to ${last}`;
+  return `${name}.${extension}`;
+}

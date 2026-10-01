@@ -48,7 +48,7 @@ export async function buildDocument(items, options = {}) {
 
   const {
     dateFontSize   = 72,   // half-points → 36pt
-    contentFontSize = 72,  // half-points → 36pt
+    contentFontSize = 86,  // half-points → 43pt (~20% larger than the date)
   } = options;
 
   const contentFontName = PRINT_FONT_NAME;
